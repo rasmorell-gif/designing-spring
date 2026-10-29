@@ -827,8 +827,8 @@ const garden = (() => {
   function frame() { raf = 0; const u = now(); paint(g, W, H, s, u); if (u < DONE) raf = requestAnimationFrame(frame); }
   function draw() { if (!raf) frame(); }
   function regrow() { seed = 1 + Math.floor(Math.random() * 99999); live = true; growMs = 4000; measure(); t0 = performance.now(); draw(); }   // al mutar crece otra vez, más rápido que la primera
-  let rt = 0;
-  addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { measure(); draw(); }, 150); });
+  let rt = 0;   // al cambiar el tamaño se redibuja en el siguiente cuadro: si esperara, el navegador estiraría el dibujo viejo
+  addEventListener('resize', () => { if (rt) return; rt = requestAnimationFrame(() => { rt = 0; measure(); if (raf) { cancelAnimationFrame(raf); raf = 0; } frame(); }); });
   return { start() { measure(); t0 = performance.now(); draw(); }, draw, regrow };
 })();
 
